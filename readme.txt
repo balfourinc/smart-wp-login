@@ -1,10 +1,10 @@
 === Smart WP Login ===
-Contributors: nishant_kumar
+Contributors: nishant_kumar, jsulinski
 Tags: login using email, registration using email, retrieve password using email, 
 remove username, login, registration, password, authentication, wp-login, email, smart
 Requires at least: 3.1.0
-Tested up to: 4.2.2
-Stable tag: 1.0.2
+Tested up to: 4.4.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,9 @@ with demo$demo@example.com, and username demodemo already exists, its username
 would be demodemo_546.
 
 == Changelog ==
+
+= 1.0.3 =
+1. Update wp_new_user_notification override function to accommodate changes in this pluggable function. This bug was preventing emails from being sent.
 
 = 1.0.2 =
 1. Improved registration mechanism.

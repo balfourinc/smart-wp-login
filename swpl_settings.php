@@ -211,6 +211,19 @@ class SWPL_Settings {
                 'smart-wp-login',
                 'swpl_enable');
         
+        //
+        // Enable Hash Section
+        //
+        add_settings_section('swpl_hash', 
+                __('Hash Usernames', 'smart-wp-login'), 
+                array($this, 'callback_swplHashSection'), 'smart-wp-login');
+        
+        //Enable in Login
+        add_settings_field('swpl_enable_username_hash', 
+                __("Assign a unique hash for usernames (rather than member's email prefix)", 'smart-wp-login'),
+                array($this, 'callback_swplEnableUsernameHashField'),
+                'smart-wp-login',
+                'swpl_hash');
         
         //
         //Custom Message
@@ -428,7 +441,18 @@ class SWPL_Settings {
         <input type="checkbox" id="swpl_enable_retrieve_password" name="swpl_settings[swpl_enable_retrieve_password]" <?php echo (self::isRetrievePasswordSmart())? 'checked="checked"':''; ?> >
 <?php
     }
+
+    ############################################################################
+    # Enable Hash Section and Fields
+    ############################################################################
+    public function callback_swplHashSection(){
+    }
     
+    public function callback_swplEnableUsernameHashField(){
+?>
+        <input type="checkbox" id="swpl_enable_username_hash" name="swpl_settings[swpl_enable_username_hash]" <?php echo (self::areUsernamesHashed())? 'checked="checked"':''; ?> >
+<?php
+    }
     
     ############################################################################
     # Getters
@@ -472,6 +496,14 @@ class SWPL_Settings {
                 self::$settings[$string_key] : '';
         
         return $val;        
+    }
+
+    /**
+     * Wheather usernames are hashed or not
+     * @return type
+     */
+    public static function areUsernamesHashed(){
+        return (!empty(self::$settings) && isset(self::$settings['swpl_enable_username_hash']));
     }
     
     ############################################################################

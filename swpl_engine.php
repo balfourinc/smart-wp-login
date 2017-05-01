@@ -42,6 +42,20 @@ class SWPL_Engine{
             //Remove error for username, show error for email only.
             add_filter('registration_errors', array($this, 'callback_RegistrationErrors'), 10, 3);
 
+            // Remove error for username in Buddypress
+            add_filter('bp_core_validate_user_signup', array($this, 'callback_BPRegistrationErrors'));
+
+            // Ensure a username is assign in BP
+            add_filter('bp_signup_validate', array($this, 'callback_BPSignupValidation'));
+
+            if (SWPL_Settings::areUsernamesHashed()) {
+                // Hash the username
+                add_action( 'bp_core_signup_user', array($this, 'callback_BPFinaliseSignup' ), 10, 5);
+            }
+            
+            // Ensure any missing _POST fields are present
+            add_action( 'bp_signup_pre_validate', array($this, 'callback_BPPreSignup'));
+
             /**
              * Add customization to registration form.
              * Ref: 
@@ -165,22 +179,7 @@ class SWPL_Engine{
      * 1 to 999. Ex: demodemo_567
      */
     public function callback_LoginFormRegister(){
-        if(isset($_POST['user_login']) && isset($_POST['user_email']) && !empty($_POST['user_email'])){
-            //In case user email contains single quote ', WP will add a slash automatically. Yes, emails can use special chars, see RFC 5322
-            $_POST['user_email'] = stripslashes($_POST['user_email']);
-            
-            // Split out the local and domain parts
-            list( $local, ) = explode( '@', $_POST['user_email'], 2 );
-        
-            //Sanitize special characters in email fields, if any. Yes, emails can use special chars, see RFC 5322
-            $_POST['user_login'] = sanitize_user($local, true);
-            
-            $pre_change = $_POST['user_login'];
-            //In case username already exists, change it
-            while(username_exists($_POST['user_login'])){
-                $_POST['user_login'] = $pre_change . '_' . rand(1, 999);
-            }
-        }
+        $this->setTemporaryUsernameInRequest('user_login', 'user_email');
         
         //Change Registration related text
         add_filter('gettext', array($this, 'callback_RegisterGettext'), 20, 3); 
@@ -198,6 +197,105 @@ class SWPL_Engine{
             unset($wp_error->errors['username_exists']);
         }
         return $wp_error;
+    }
+
+    /**
+     * Ensure necessary _POST variables are present
+     */
+    public function callback_BPPreSignup() {
+        if (!isset($_POST['signup_username'])) {
+            $_POST['signup_username'] = null;
+        }
+    }
+
+    /**
+     * Remove registration message for username
+     * @param array $result Existing error result:
+     *     string user_name
+     *     string user_email
+     *     WP_Error errors
+     */
+    public function callback_BPRegistrationErrors($result){
+        if (isset($result['errors']->errors) && isset($result['errors']->errors['user_name'])) {
+            unset($result['errors']->errors['user_name']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Inject a temporary username into the signup process
+     */
+    public function callback_BPSignupValidation() {
+        $this->setTemporaryUsernameInRequest('signup_username', 'signup_email');
+    }
+
+    /**
+     * Change temporary username into permanent. Creates hash from user_id
+
+     * @param int $user_id
+     * @param string $user_login
+     * @param string $user_password
+     * @param string $user_email
+     * @param array $usermeta
+     */
+    public function callback_BPFinaliseSignup($user_id, $user_login, $user_password, $user_email, $usermeta) {
+        global $wpdb;
+        
+        $salt = 'smart-wp-login';
+        $hashids = new Hashids\Hashids($salt);
+        $new_user_login = $hashids->encode($user_id);
+        $signups_table = buddypress()->members->table_name_signups;
+        $users_table = $wpdb->prefix.'users';
+
+		$wpdb->update(
+            $signups_table,
+            array( 'user_login' => $new_user_login ),
+            array( 'user_login' => $user_login ),
+            array( '%s' ),
+            array( '%s' )
+        );
+
+        $wpdb->update(
+            $users_table,
+            array(
+                'user_login' => $new_user_login,
+                'user_nicename' => $new_user_login,
+            ),
+            array( 'ID' => $user_id ),
+            array( '%s', '%s' ),
+            array( '%d' )
+        );
+
+        wp_cache_delete($user_id, 'userslugs');
+        wp_cache_delete($user_id, 'userlogins');
+        wp_cache_delete($user_id, 'users');            
+        wp_cache_delete('bp_core_userdata_' . $user_id, 'bp');
+    }
+
+    /**
+     * Set the $_POST global values for registration
+     * 
+     * @param $usernameKey Array key for the username. WP uses user_login, BP signup_username
+     * @param $emailKey Array key for the email. WP user user_email, BP signup_email
+     */
+    private function setTemporaryUsernameInRequest($usernameKey, $emailKey) {
+        if(isset($_POST[$emailKey]) && !empty($_POST[$emailKey])){
+            //In case user email contains single quote ', WP will add a slash automatically. Yes, emails can use special chars, see RFC 5322
+            $_POST[$emailKey] = stripslashes($_POST[$emailKey]);
+            
+            // Split out the local and domain parts
+            list( $local, ) = explode( '@', $_POST[$emailKey], 2 );
+        
+            //Sanitize special characters in email fields, if any. Yes, emails can use special chars, see RFC 5322
+            $_POST[$usernameKey] = sanitize_user($local, true);
+            
+            $pre_change = $_POST[$usernameKey];
+            //In case username already exists, change it
+            while(username_exists($_POST[$usernameKey])){
+                $_POST[$usernameKey] = $pre_change . '_' . rand(1, 999);
+            }
+        }
     }
     
     /**

@@ -40,6 +40,8 @@ define('SWPL_URL', plugin_dir_url(__FILE__));
 require 'swpl_settings.php';
 require 'swpl_engine.php';
 require 'swpl_overrides_wp.php';
+require_once 'vendor/Hashids/HashGenerator.php';
+require_once 'vendor/Hashids/Hashids.php';
 
 //Go Go Go
 new SWPL_Settings();

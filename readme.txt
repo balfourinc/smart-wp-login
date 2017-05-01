@@ -1,10 +1,10 @@
 === Smart WP Login ===
-Contributors: nishant_kumar, jsulinski
+Contributors: nishant_kumar, jsulinski, sjregan
 Tags: login using email, registration using email, retrieve password using email, 
 remove username, login, registration, password, authentication, wp-login, email, smart
 Requires at least: 3.1.0
-Tested up to: 4.4.2
-Stable tag: 1.0.3
+Tested up to: 4.7.4
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,10 +60,19 @@ random number as suffix. Random number is between 1 to 999. Ex: if user register
 with demo$demo@example.com, and username demodemo already exists, its username
 would be demodemo_546.
 
+= What if I want a different type of username generated? =
+
+You can optionally set for usernames to be a generated hash based on the user ID.
+
 == Changelog ==
 
+= 1.1 =
+1. Added support for BuddyPress registrations.
+1. Added option to use hashids instead of partial email address.
+
 = 1.0.3 =
-1. Update wp_new_user_notification override function to accommodate changes in this pluggable function. This bug was preventing emails from being sent.
+1. Update wp_new_user_notification override function to accommodate changes in
+this pluggable function. This bug was preventing emails from being sent.
 
 = 1.0.2 =
 1. Improved registration mechanism.

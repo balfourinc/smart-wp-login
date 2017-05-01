@@ -247,8 +247,8 @@ class SWPL_Engine{
         $new_user_login = $hashids->encode($user_id);
         $signups_table = buddypress()->members->table_name_signups;
         $users_table = $wpdb->prefix.'users';
-
-		$wpdb->update(
+        
+        $wpdb->update(
             $signups_table,
             array( 'user_login' => $new_user_login ),
             array( 'user_login' => $user_login ),
@@ -276,8 +276,8 @@ class SWPL_Engine{
     /**
      * Set the $_POST global values for registration
      * 
-     * @param $usernameKey Array key for the username. WP uses user_login, BP signup_username
-     * @param $emailKey Array key for the email. WP user user_email, BP signup_email
+     * @param string $usernameKey Array key for the username. WP uses user_login, BP signup_username
+     * @param string $emailKey Array key for the email. WP user user_email, BP signup_email
      */
     private function setTemporaryUsernameInRequest($usernameKey, $emailKey) {
         if(isset($_POST[$emailKey]) && !empty($_POST[$emailKey])){

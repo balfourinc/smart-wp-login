@@ -271,6 +271,9 @@ class SWPL_Engine{
         wp_cache_delete($user_id, 'userlogins');
         wp_cache_delete($user_id, 'users');            
         wp_cache_delete('bp_core_userdata_' . $user_id, 'bp');
+
+        $bp = buddypress();
+        $bp->signup->username = $new_user_login;
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Smart WP Login
- * Version: 1.1
+ * Version: 1.2
  * Author: Nishant Kumar
  * Author URI: http://thebinary.in/
  * Text Domain: smart-wp-login

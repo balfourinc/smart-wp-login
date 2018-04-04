@@ -4,7 +4,7 @@ Tags: login using email, registration using email, retrieve password using email
 remove username, login, registration, password, authentication, wp-login, email, smart
 Requires at least: 3.1.0
 Tested up to: 4.7.4
-Stable tag: 1.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,9 @@ would be demodemo_546.
 You can optionally set for usernames to be a generated hash based on the user ID.
 
 == Changelog ==
+
+= 1.2 =
+1. Added ability to filter new user notification emails
 
 = 1.1 =
 1. Added support for BuddyPress registrations.

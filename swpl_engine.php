@@ -232,22 +232,23 @@ class SWPL_Engine{
 
     /**
      * Change temporary username into permanent. Creates hash from user_id
-
-     * @param int $user_id
+     *
+     * @param int    $user_id
      * @param string $user_login
      * @param string $user_password
      * @param string $user_email
-     * @param array $usermeta
+     * @param array  $user_meta
+     * @throws Exception
      */
-    public function callback_BPFinaliseSignup($user_id, $user_login, $user_password, $user_email, $usermeta) {
+    public function callback_BPFinaliseSignup($user_id, $user_login, $user_password, $user_email, $user_meta) {
         global $wpdb;
-        
-        $salt = 'smart-wp-login';
-        $hashids = new Hashids\Hashids($salt);
-        $new_user_login = $hashids->encode($user_id);
-        $signups_table = buddypress()->members->table_name_signups;
-        $users_table = $wpdb->prefix.'users';
-        
+
+        $salt           = 'smart-wp-login';
+        $hashids        = new Hashids\Hashids( $salt, 0, 'abcdefghijklmnopqrstuvwxyz1234567890' );
+        $new_user_login = $hashids->encode( $user_id );
+        $signups_table  = buddypress()->members->table_name_signups;
+        $users_table    = $wpdb->users;
+
         $wpdb->update(
             $signups_table,
             array( 'user_login' => $new_user_login ),
@@ -269,7 +270,7 @@ class SWPL_Engine{
 
         wp_cache_delete($user_id, 'userslugs');
         wp_cache_delete($user_id, 'userlogins');
-        wp_cache_delete($user_id, 'users');            
+        wp_cache_delete($user_id, 'users');
         wp_cache_delete('bp_core_userdata_' . $user_id, 'bp');
 
         $bp = buddypress();

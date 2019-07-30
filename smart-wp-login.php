@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name: Smart WP Login
- * Version: 1.0.2
+ * Version: 1.2.1
  * Author: Nishant Kumar
  * Author URI: http://thebinary.in/
+ * Contributors: sjregan, zipline
  * Text Domain: smart-wp-login
  * Description: Use email to login, register and retrieve password in WordPress.
  */
@@ -33,13 +34,15 @@ if(!function_exists('add_action')){
 }
 
 //global constants
-define('SWPL_VERSION', '1.0.2');
+define('SWPL_VERSION', '1.2.1');
 define('SWPL_URL', plugin_dir_url(__FILE__));
 
 //load required files
 require 'swpl_settings.php';
 require 'swpl_engine.php';
 require 'swpl_overrides_wp.php';
+require_once 'vendor/Hashids/HashGenerator.php';
+require_once 'vendor/Hashids/Hashids.php';
 
 //Go Go Go
 new SWPL_Settings();

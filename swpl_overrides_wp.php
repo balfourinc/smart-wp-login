@@ -37,8 +37,39 @@ function wp_new_user_notification( $user_id, $deprecated = null, $notify = '' ) 
 	$message  = sprintf(__('New user registration on your site %s:'), $blogname) . "\r\n\r\n";
 	$message .= sprintf(__('Username: %s'), $user->user_login) . "\r\n\r\n";
 	$message .= sprintf(__('Email: %s'), $user->user_email) . "\r\n";
-
-	@wp_mail(get_option('admin_email'), sprintf(__('[%s] New User Registration'), $blogname), $message);
+    
+    $wp_new_user_notification_email_admin = array(
+        'to'      => get_option( 'admin_email' ),
+        /* translators: Password change notification email subject. %s: Site title */
+        'subject' => __( '[%s] New User Registration' ),
+        'message' => $message,
+        'headers' => '',
+    );
+    
+    /**
+     * Filters the contents of the new user notification email sent to the site admin.
+     *
+     * @since 4.9.0
+     *
+     * @param array   $wp_new_user_notification_email {
+     *     Used to build wp_mail().
+     *
+     *     @type string $to      The intended recipient - site admin email address.
+     *     @type string $subject The subject of the email.
+     *     @type string $message The body of the email.
+     *     @type string $headers The headers of the email.
+     * }
+     * @param WP_User $user     User object for new user.
+     * @param string  $blogname The site title.
+     */
+    $wp_new_user_notification_email_admin = apply_filters( 'wp_new_user_notification_email_admin', $wp_new_user_notification_email_admin, $user, $blogname );
+    
+    @wp_mail(
+        $wp_new_user_notification_email_admin['to'],
+        wp_specialchars_decode( sprintf( $wp_new_user_notification_email_admin['subject'], $blogname ) ),
+        $wp_new_user_notification_email_admin['message'],
+        $wp_new_user_notification_email_admin['headers']
+    );
 
 	// `$deprecated was pre-4.3 `$plaintext_pass`. An empty `$plaintext_pass` didn't sent a user notifcation.
 	if ( 'admin' === $notify || ( empty( $deprecated ) && empty( $notify ) ) ) {
@@ -65,7 +96,38 @@ function wp_new_user_notification( $user_id, $deprecated = null, $notify = '' ) 
 	$message .= '<' . network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user->user_login), 'login') . ">\r\n\r\n";
 
 	$message .= wp_login_url() . "\r\n";
-
-	wp_mail($user->user_email, sprintf(__('[%s] Your username and password info'), $blogname), $message);
+    
+    $wp_new_user_notification_email = array(
+        'to'      => $user->user_email,
+        /* translators: Password change notification email subject. %s: Site title */
+        'subject' => __( '[%s] Your username and password info' ),
+        'message' => $message,
+        'headers' => '',
+    );
+    
+    /**
+     * Filters the contents of the new user notification email sent to the new user.
+     *
+     * @since 4.9.0
+     *
+     * @param array   $wp_new_user_notification_email {
+     *     Used to build wp_mail().
+     *
+     *     @type string $to      The intended recipient - New user email address.
+     *     @type string $subject The subject of the email.
+     *     @type string $message The body of the email.
+     *     @type string $headers The headers of the email.
+     * }
+     * @param WP_User $user     User object for new user.
+     * @param string  $blogname The site title.
+     */
+    $wp_new_user_notification_email = apply_filters( 'wp_new_user_notification_email', $wp_new_user_notification_email, $user, $blogname );
+    
+    wp_mail(
+        $wp_new_user_notification_email['to'],
+        wp_specialchars_decode( sprintf( $wp_new_user_notification_email['subject'], $blogname ) ),
+        $wp_new_user_notification_email['message'],
+        $wp_new_user_notification_email['headers']
+    );
 }
 endif;
